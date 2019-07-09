@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.Menu;
@@ -20,10 +22,13 @@ import android.widget.TextView;
 import com.cleanup.todoc.R;
 import com.cleanup.todoc.model.Project;
 import com.cleanup.todoc.model.Task;
+import com.cleanup.todoc.viewmodel.TaskViewModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Observable;
 
 /**
  * <p>Home activity of the application which is displayed when the user opens the app.</p>
@@ -41,12 +46,12 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * List of all current tasks of the application
      */
     @NonNull
-    private final ArrayList<Task> tasks = new ArrayList<>();
+    private final ArrayList<Task> mTasks = new ArrayList<>();
 
     /**
      * The adapter which handles the list of tasks
      */
-    private final TasksAdapter adapter = new TasksAdapter(tasks, this);
+    private final TasksAdapter adapter = new TasksAdapter(this);
 
     /**
      * The sort method to be used to display tasks
@@ -88,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     @NonNull
     private TextView lblNoTasks;
 
+    private TaskViewModel taskViewModel;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +105,14 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         lblNoTasks = findViewById(R.id.lbl_no_task);
 
         //TODO: set an observer of our viewmodel that refresh the adapter's data
+        taskViewModel = ViewModelProviders.of(this).get(TaskViewModel.class);
+        taskViewModel.getAllTasks().observe(this, new Observer<List<Task>>() {
+                    @Override
+                    public void onChanged(List<Task> tasks) {
+                        adapter.updateTasks(tasks);
+                    }
+                });
+
 
         listTasks.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         listTasks.setAdapter(adapter);
@@ -130,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
             sortMethod = SortMethod.RECENT_FIRST;
         }
 
-        updateTasks();
+        //updateTasks();
 
         return super.onOptionsItemSelected(item);
     }
@@ -138,8 +153,9 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     @Override
     public void onDeleteTask(Task task) {
         //TODO 3: delete in database
-        tasks.remove(task);
-        updateTasks();
+        taskViewModel.delete(task);
+        //tasks.remove(task);
+        //updateTasks();
     }
 
     /**
@@ -212,38 +228,39 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * @param task the task to be added to the list
      */
     private void addTask(@NonNull Task task) {
-        tasks.add(task);
-        updateTasks();
+        taskViewModel.insert(task);
+        //tasks.add(task);
+        //updateTasks();
     }
 
     /**
      * Updates the list of tasks in the UI
      */
-    private void updateTasks() {
-        if (tasks.size() == 0) {
-            lblNoTasks.setVisibility(View.VISIBLE);
-            listTasks.setVisibility(View.GONE);
-        } else {
-            lblNoTasks.setVisibility(View.GONE);
-            listTasks.setVisibility(View.VISIBLE);
-            switch (sortMethod) {
-                case ALPHABETICAL:
-                    Collections.sort(tasks, new Task.TaskAZComparator());
-                    break;
-                case ALPHABETICAL_INVERTED:
-                    Collections.sort(tasks, new Task.TaskZAComparator());
-                    break;
-                case RECENT_FIRST:
-                    Collections.sort(tasks, new Task.TaskRecentComparator());
-                    break;
-                case OLD_FIRST:
-                    Collections.sort(tasks, new Task.TaskOldComparator());
-                    break;
-
-            }
-            adapter.updateTasks(tasks);
-        }
-    }
+    //private void updateTasks() {
+    //    if (tasks.size() == 0) {
+    //        lblNoTasks.setVisibility(View.VISIBLE);
+    //        listTasks.setVisibility(View.GONE);
+    //    } else {
+    //        lblNoTasks.setVisibility(View.GONE);
+    //        listTasks.setVisibility(View.VISIBLE);
+    //        switch (sortMethod) {
+    //            case ALPHABETICAL:
+    //                Collections.sort(tasks, new Task.TaskAZComparator());
+    //                break;
+    //            case ALPHABETICAL_INVERTED:
+    //                Collections.sort(tasks, new Task.TaskZAComparator());
+    //                break;
+    //            case RECENT_FIRST:
+    //                Collections.sort(tasks, new Task.TaskRecentComparator());
+    //                break;
+    //            case OLD_FIRST:
+    //                Collections.sort(tasks, new Task.TaskOldComparator());
+    //                break;
+//
+    //        }
+    //        adapter.updateTasks(tasks);
+    //    }
+    //}
 
     /**
      * Returns the dialog allowing the user to create a new task.
