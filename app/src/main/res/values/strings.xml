@@ -16,4 +16,13 @@
     <string name="task_name_hint">Nom de la tâche</string>
 
     <string name="empty_task_name">Le nom de la tâche doit être renseigné</string>
+
+    //SORTING PREFERENCES
+    <string name="ALPHABETICAL">ALPHABETICAL</string>
+    <string name="ALPHABETICAL_INVERTED">ALPHABETICAL_INVERTED</string>
+    <string name="RECENT_FIRST">RECENT_FIRST</string>
+    <string name="OLD_FIRST">OLD_FIRST</string>
+    <string name="NONE">NONE</string>
+
+
 </resources>

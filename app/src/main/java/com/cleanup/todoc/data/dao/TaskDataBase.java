@@ -1,4 +1,4 @@
-package com.cleanup.todoc.dao;
+package com.cleanup.todoc.data.dao;
 
 import android.content.Context;
 
