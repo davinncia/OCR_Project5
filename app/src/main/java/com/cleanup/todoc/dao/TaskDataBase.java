@@ -13,6 +13,8 @@ public abstract class TaskDataBase extends RoomDatabase {
 
     public static TaskDataBase instance;
 
+    public abstract TaskDao taskDao();
+
     //Synchronized means only one thread at a time can access it
     public static synchronized TaskDataBase getInstance(Context context){
         if (instance == null){

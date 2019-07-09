@@ -97,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         listTasks = findViewById(R.id.list_tasks);
         lblNoTasks = findViewById(R.id.lbl_no_task);
 
+        //TODO: set an observer of our viewmodel that refresh the adapter's data
+
         listTasks.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         listTasks.setAdapter(adapter);
 
@@ -135,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
     @Override
     public void onDeleteTask(Task task) {
+        //TODO 3: delete in database
         tasks.remove(task);
         updateTasks();
     }
@@ -173,6 +176,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                         new Date().getTime()
                 );
 
+                //TODO 2: insert task in database
                 addTask(task);
 
                 dialogInterface.dismiss();
