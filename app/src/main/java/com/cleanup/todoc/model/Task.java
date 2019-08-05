@@ -1,8 +1,12 @@
 package com.cleanup.todoc.model;
 
+import android.graphics.Color;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 import java.util.Comparator;
@@ -14,17 +18,20 @@ import java.util.Comparator;
  */
 
 //Creates an SQLite table at launch
-@Entity(tableName = "task_table")
+@Entity(tableName = "task_table", foreignKeys = @ForeignKey(entity = Task.class, parentColumns = "id", childColumns = "project_id", onDelete = ForeignKey.CASCADE))
+
 public class Task {
     /**
      * The unique identifier of the task
      */
     @PrimaryKey(autoGenerate = true)
-    private long id;
+    private Integer id;
 
     /**
      * The unique identifier of the project associated to the task
      */
+    @ForeignKey(entity = Task.class, parentColumns = "id", childColumns = "project_id")
+    @ColumnInfo(name = "project_id")
     private long projectId;
 
     /**
@@ -43,24 +50,25 @@ public class Task {
     /**
      * Instantiates a new Task.
      *
-     * @param id                the unique identifier of the task to set
+     * //@param  id              the unique identifier of the task to set
      * @param projectId         the unique identifier of the project associated to the task to set
      * @param name              the name of the task to set
      * @param creationTimestamp the timestamp when the task has been created to set
      */
-    public Task(long id, long projectId, @NonNull String name, long creationTimestamp) {
-        this.setId(id);
+    public Task(long projectId, @NonNull String name, long creationTimestamp) {
         this.setProjectId(projectId);
         this.setName(name);
         this.setCreationTimestamp(creationTimestamp);
     }
+
+
 
     /**
      * Returns the unique identifier of the task.
      *
      * @return the unique identifier of the task
      */
-    public long getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -69,7 +77,7 @@ public class Task {
      *
      * @param id the unique idenifier of the task to set
      */
-    private void setId(long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -91,10 +99,12 @@ public class Task {
      *
      * @return the project associated to the task
      */
+    /*
     @Nullable
     public Project getProject() {
         return Project.getProjectById(projectId);
     }
+    */
 
     /**
      * Returns the name of the task.

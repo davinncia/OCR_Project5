@@ -26,6 +26,8 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
      */
     private List<Task> mTasks;
 
+    private List<Project> mProjects;
+
     /**
      * The listener for when a task needs to be deleted
      */
@@ -46,8 +48,9 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
      *
      * @param tasks the list of tasks the adapter deals with to set
      */
-    void updateTasks(@NonNull final List<Task> tasks) {
+    void updateTasks(@NonNull final List<Task> tasks, @NonNull final List<Project> projects) {
         this.mTasks = tasks;
+        this.mProjects = projects;
         notifyDataSetChanged();
     }
 
@@ -150,7 +153,9 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
             lblTaskName.setText(task.getName());
             imgDelete.setTag(task);
 
-            final Project taskProject = task.getProject();
+            //TODO 12: get project by id
+            final Project taskProject = getCorrespondingProject(task, mProjects);
+
             if (taskProject != null) {
                 imgProject.setSupportImageTintList(ColorStateList.valueOf(taskProject.getColor()));
                 lblProjectName.setText(taskProject.getName());
@@ -159,6 +164,15 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
                 lblProjectName.setText("");
             }
 
+        }
+
+        private Project getCorrespondingProject(Task task, List<Project> projects){
+            for (Project project : projects){
+                if (task.getProjectId() == project.getId()){
+                    return project;
+                }
+            }
+            return null;
         }
     }
 }

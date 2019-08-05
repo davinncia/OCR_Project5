@@ -6,20 +6,19 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
-import com.cleanup.todoc.model.Task;
+import com.cleanup.todoc.model.Project;
 
 import java.util.List;
 
 @Dao
-public interface TaskDao {
-
-    @Query("SELECT * FROM task_table ")
-    LiveData<List<Task>> getAllTasks();
+public interface ProjectDao {
 
     @Insert
-    void insert(Task task);
+    void insert(Project project);
 
     @Delete
-    void delete(Task task);
+    void delete(Project project);
 
+    @Query("SELECT * FROM project_table ")
+    LiveData<List<Project>> getAllProjects();
 }

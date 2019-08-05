@@ -1,6 +1,7 @@
 package com.cleanup.todoc.ui;
 
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,6 +11,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,8 +25,10 @@ import android.widget.TextView;
 import com.cleanup.todoc.R;
 import com.cleanup.todoc.data.preferences.SortingPreferences;
 import com.cleanup.todoc.di.Injection;
+import com.cleanup.todoc.di.ViewModelFactory;
 import com.cleanup.todoc.model.Project;
 import com.cleanup.todoc.model.Task;
+import com.cleanup.todoc.repository.TaskRepository;
 import com.cleanup.todoc.viewmodel.TaskViewModel;
 
 import java.util.ArrayList;
@@ -42,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     /**
      * List of all projects available in the application
      */
-    private final Project[] allProjects = Project.getAllProjects();
+    //TODO 10: get projects from project_table
+    private List<Project> allProjects = new ArrayList<>();
 
     /**
      * List of all current tasks of the application
@@ -112,17 +118,27 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         sortMethod = sortingPreferences.getSortingMethod(this);
 
         //TODO 1: set an observer of our viewmodel that refresh the adapter's data
-        taskViewModel = ViewModelProviders.of(this).get(TaskViewModel.class);
-        taskViewModel.getAllTasks().observe(this, new Observer<List<Task>>() {
-                    @Override
-                    public void onChanged(List<Task> tasks) {
-                        //TODO 4: populate an array of Tasks, used to sort the order
-                        mTasks.clear();
-                        mTasks.addAll(tasks);
-                        updateTasks();
-                    }
-                });
+        ViewModelFactory viewModelFactory = Injection.provideViewModelFactory(this);
+        taskViewModel = ViewModelProviders.of(this, viewModelFactory).get(TaskViewModel.class);
+        taskViewModel.allProjects.observe(this, new Observer<List<Project>>() {
+            @Override
+            public void onChanged(List<Project> projects) {
+                    allProjects = projects;
+            }
+        });
 
+        taskViewModel.allTasks.observe(this, new Observer<List<Task>>() {
+            @Override
+            public void onChanged(List<Task> tasks) {
+                //TODO 4: populate an array of Tasks, used to sort the order
+                mTasks.clear();
+                mTasks.addAll(tasks);
+                updateTasks();
+            }
+        });
+
+        //Doesn't work, have to go through observer
+        //allProjects = taskViewModel.getAllProjects().getValue();
 
         listTasks.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         listTasks.setAdapter(adapter);
@@ -194,18 +210,15 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
             }
             // If both project and name of the task have been set
             else if (taskProject != null) {
-                // TODO: Replace this by id of persisted task
-                long id = (long) (Math.random() * 50000);
-
+                // TODO 6: No need for that as it's an auto generated primary key
+                //long id = (long) (Math.random() * 50000);
 
                 Task task = new Task(
-                        id,
                         taskProject.getId(),
                         taskName,
                         new Date().getTime()
                 );
 
-                //TODO 2: insert task in database
                 addTask(task);
 
                 dialogInterface.dismiss();
@@ -273,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                     break;
 
             }
-            adapter.updateTasks(mTasks);
+            adapter.updateTasks(mTasks, allProjects);
         }
     }
 
@@ -324,10 +337,14 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * Sets the data of the Spinner with projects to associate to a new task
      */
     private void populateDialogSpinner() {
-        final ArrayAdapter<Project> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, allProjects);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        if (dialogSpinner != null) {
-            dialogSpinner.setAdapter(adapter);
+
+        if (allProjects != null) {
+
+            final ArrayAdapter<Project> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, allProjects);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            if (dialogSpinner != null) {
+                dialogSpinner.setAdapter(adapter);
+            }
         }
     }
 }
