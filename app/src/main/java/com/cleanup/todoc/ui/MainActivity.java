@@ -169,7 +169,10 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         } else if (id == R.id.filter_oldest_first) {
             sortMethod = getString(R.string.OLD_FIRST);
         } else if (id == R.id.filter_recent_first) {
-            sortMethod = getString(R.string.RECENT_FIRST);
+            //sortMethod = getString(R.string.RECENT_FIRST);
+            //TODO: Cascade Test
+            //Deleting project Tartampion
+            taskViewModel.deleteProject(allProjects.get(0));
         }
 
         sortingPreferences.saveSortingMethod(this, sortMethod);

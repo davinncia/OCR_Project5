@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.util.Comparator;
@@ -18,7 +19,9 @@ import java.util.Comparator;
  */
 
 //Creates an SQLite table at launch
-@Entity(tableName = "task_table", foreignKeys = @ForeignKey(entity = Task.class, parentColumns = "id", childColumns = "project_id", onDelete = ForeignKey.CASCADE))
+@Entity(tableName = "task_table",
+        indices = @Index("project_id"),
+        foreignKeys = @ForeignKey(entity = Task.class, parentColumns = "id", childColumns = "project_id", onDelete = ForeignKey.CASCADE))
 
 public class Task {
     /**
@@ -30,7 +33,7 @@ public class Task {
     /**
      * The unique identifier of the project associated to the task
      */
-    @ForeignKey(entity = Task.class, parentColumns = "id", childColumns = "project_id")
+    //FOREIGN KEY CONSTRAINT FAILS
     @ColumnInfo(name = "project_id")
     private long projectId;
 
