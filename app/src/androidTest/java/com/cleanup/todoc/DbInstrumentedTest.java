@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(AndroidJUnit4.class)
 public class DbInstrumentedTest {
@@ -46,32 +47,49 @@ public class DbInstrumentedTest {
         mProjectDao = db.projectDao();
     }
 
+    @Before
+    public void addProject(){
+        Project tartampion = new Project(1, "Tartampion", Color.RED);
+        mProjectDao.insert(tartampion);
+    }
+
     @After
     public void closeDb() throws IOException {
         db.close();
     }
 
-    //TODO: The onCreate callback might not be called here...
     @Test
     public void getProjects() throws Exception {
-        Project tartampion = new Project(1, "Tartampion", Color.RED);
-        mProjectDao.insert(tartampion);
         List<Project> projects = LiveDataTestUtils.getValue(mProjectDao.getAllProjects());
         assertEquals("Tartampion", projects.get(0).getName());
     }
 
     @Test
-    public void insertAndReadTask() throws InterruptedException {
+    public void insertReadAndDeleteTask() throws InterruptedException {
 
         Task task = new Task(1, "test", 1234);
         mTaskDao.insert(task);
-        List<Task> tasks = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());//mTaskDao.getAllTasks().getValue();
+        List<Task> tasks = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());
         assertEquals("test", tasks.get(0).getName());
+
+        //TODO: doesn't seem to delete...
+        mTaskDao.delete(task);
+        List<Task> tasks2 = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());
+        assertEquals(0, tasks2.size());
+        //assertNull(tasks2.get(0));
     }
 
+    //Foreign Key CASCADE test
+    @Test
+    public void deleteProjectDeletesTasks() throws InterruptedException {
+        Task task = new Task(1, "test", 1234);
+        mTaskDao.insert(task);
 
-    //Check projects
+        Project tartampion = LiveDataTestUtils.getValue(mProjectDao.getAllProjects()).get(0);
+        mProjectDao.delete(tartampion);
+        List<Task> tasks = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());
+        assertEquals(0, tasks.size());
 
-    //Check CRUM
+    }
 
 }

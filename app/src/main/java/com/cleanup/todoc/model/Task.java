@@ -21,7 +21,7 @@ import java.util.Comparator;
 //Creates an SQLite table at launch
 @Entity(tableName = "task_table",
         indices = @Index("project_id"),
-        foreignKeys = @ForeignKey(entity = Task.class, parentColumns = "id", childColumns = "project_id", onDelete = ForeignKey.CASCADE))
+        foreignKeys = @ForeignKey(entity = Project.class, parentColumns = "id", childColumns = "project_id", onDelete = ForeignKey.CASCADE))
 
 public class Task {
     /**
@@ -33,16 +33,12 @@ public class Task {
     /**
      * The unique identifier of the project associated to the task
      */
-    //FOREIGN KEY CONSTRAINT FAILS
     @ColumnInfo(name = "project_id")
     private long projectId;
 
     /**
      * The name of the task
      */
-    // Suppress warning because setName is called in constructor
-    @SuppressWarnings("NullableProblems")
-    @NonNull
     private String name;
 
     /**

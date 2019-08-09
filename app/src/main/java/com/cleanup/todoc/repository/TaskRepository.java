@@ -1,8 +1,6 @@
 package com.cleanup.todoc.repository;
 
-import android.app.Application;
 import android.content.Context;
-import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
@@ -45,49 +43,15 @@ public class TaskRepository {
     }
 
     public void insertProject(Project project){
-
-        new InsertProjectAsyncTask(projectDao).execute(project);
+        projectDao.insert(project);
     }
 
     public void deleteProject(Project project){
-        new DeleteProjectAsyncTask(projectDao).execute(project);
+        projectDao.delete(project);
     }
 
     public LiveData<List<Project>> getAllProjects(){
         //This is executed in background by Room
         return allProjects;
-    }
-
-
-
-    //Room doesn't allow database actions in main thread
-    private static class InsertProjectAsyncTask extends AsyncTask<Project, Void, Void>{
-
-        private ProjectDao projectDao;
-
-        public InsertProjectAsyncTask(ProjectDao projectDao) {
-            this.projectDao = projectDao;
-        }
-
-        @Override
-        protected Void doInBackground(Project... projects) {
-            projectDao.insert(projects[0]);
-            return null;
-        }
-    }
-
-    private static class DeleteProjectAsyncTask extends AsyncTask<Project, Void, Void>{
-
-        private ProjectDao projectDao;
-
-        public DeleteProjectAsyncTask(ProjectDao projectDao){
-            this.projectDao = projectDao;
-        }
-
-        @Override
-        protected Void doInBackground(Project... projects) {
-           projectDao.delete(projects[0]);
-            return null;
-        }
     }
 }

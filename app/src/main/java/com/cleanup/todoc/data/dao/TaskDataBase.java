@@ -42,13 +42,6 @@ public abstract class TaskDataBase extends RoomDatabase {
             super.onCreate(db);
             new PopulateProjectDbAsyncTask(instance).execute();
         }
-
-        //Allowing CASCADE deletion for foreign keys, unactivated by default
-        @Override
-        public void onOpen(@NonNull SupportSQLiteDatabase db) {
-            super.onOpen(db);
-            db.execSQL("PRAGMA foreign_keys = ON;");
-        }
     };
 
     private static class PopulateProjectDbAsyncTask extends AsyncTask<Void, Void, Void> {

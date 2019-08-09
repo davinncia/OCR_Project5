@@ -1,7 +1,6 @@
 package com.cleanup.todoc.ui;
 
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,7 +11,6 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,14 +26,12 @@ import com.cleanup.todoc.di.Injection;
 import com.cleanup.todoc.di.ViewModelFactory;
 import com.cleanup.todoc.model.Project;
 import com.cleanup.todoc.model.Task;
-import com.cleanup.todoc.repository.TaskRepository;
-import com.cleanup.todoc.viewmodel.TaskViewModel;
+import com.cleanup.todoc.viewmodel.MainViewModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Observable;
 
 /**
  * <p>Home activity of the application which is displayed when the user opens the app.</p>
@@ -47,14 +43,14 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     /**
      * List of all projects available in the application
      */
-    //TODO 10: get projects from project_table
+    //TODO 0: get projects from project_table
     private List<Project> allProjects = new ArrayList<>();
 
     /**
      * List of all current tasks of the application
      */
     @NonNull
-    private final ArrayList<Task> mTasks = new ArrayList<>();
+    private List<Task> mTasks = new ArrayList<>();
 
     /**
      * The adapter which handles the list of tasks
@@ -101,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     @NonNull
     private TextView lblNoTasks;
 
-    private TaskViewModel taskViewModel;
+    private MainViewModel taskViewModel;
 
     private SortingPreferences sortingPreferences;
 
@@ -119,26 +115,33 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
         //TODO 1: set an observer of our viewmodel that refresh the adapter's data
         ViewModelFactory viewModelFactory = Injection.provideViewModelFactory(this);
-        taskViewModel = ViewModelProviders.of(this, viewModelFactory).get(TaskViewModel.class);
-        taskViewModel.allProjects.observe(this, new Observer<List<Project>>() {
+        taskViewModel = ViewModelProviders.of(this, viewModelFactory).get(MainViewModel.class);
+
+        taskViewModel.getAllProjects().observe(this, new Observer<List<Project>>() {
             @Override
             public void onChanged(List<Project> projects) {
                     allProjects = projects;
             }
         });
 
-        taskViewModel.allTasks.observe(this, new Observer<List<Task>>() {
+        taskViewModel.getAllTasks().observe(this, new Observer<List<Task>>() {
             @Override
             public void onChanged(List<Task> tasks) {
-                //TODO 4: populate an array of Tasks, used to sort the order
-                mTasks.clear();
-                mTasks.addAll(tasks);
-                updateTasks();
+                //TODO 4: inform the adapter that data changed
+                //mTasks.clear();
+                //mTasks.addAll(tasks);
+                //updateTasks();
+                if (tasks == null || tasks.size() == 0){
+                    lblNoTasks.setVisibility(View.VISIBLE);
+                    listTasks.setVisibility(View.GONE);
+                } else {
+                    lblNoTasks.setVisibility(View.GONE);
+                    listTasks.setVisibility(View.VISIBLE);
+                    adapter.updateTasks(tasks, allProjects);
+                }
+
             }
         });
-
-        //Doesn't work, have to go through observer
-        //allProjects = taskViewModel.getAllProjects().getValue();
 
         listTasks.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         listTasks.setAdapter(adapter);
@@ -160,24 +163,22 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        //TODO 5: Put this in preferences
 
         if (id == R.id.filter_alphabetical) {
             sortMethod = getString(R.string.ALPHABETICAL);
+            //TODO 11: Do something in ViewModel
         } else if (id == R.id.filter_alphabetical_inverted) {
             sortMethod = getString(R.string.ALPHABETICAL_INVERTED);
         } else if (id == R.id.filter_oldest_first) {
             sortMethod = getString(R.string.OLD_FIRST);
         } else if (id == R.id.filter_recent_first) {
-            //sortMethod = getString(R.string.RECENT_FIRST);
-            //TODO: Cascade Test
-            //Deleting project Tartampion
-            taskViewModel.deleteProject(allProjects.get(0));
+            sortMethod = getString(R.string.RECENT_FIRST);
         }
 
+        //TODO 5: Put this in preferences
         sortingPreferences.saveSortingMethod(this, sortMethod);
 
-        updateTasks();
+        //updateTasks();
 
         return super.onOptionsItemSelected(item);
     }
@@ -187,69 +188,9 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         //TODO 3: delete in database
         taskViewModel.delete(task);
         //tasks.remove(task);
-        updateTasks();
+        //updateTasks();
     }
 
-    /**
-     * Called when the user clicks on the positive button of the Create Task Dialog.
-     *
-     * @param dialogInterface the current displayed dialog
-     */
-    private void onPositiveButtonClick(DialogInterface dialogInterface) {
-        // If dialog is open
-        if (dialogEditText != null && dialogSpinner != null) {
-            // Get the name of the task
-            String taskName = dialogEditText.getText().toString();
-
-            // Get the selected project to be associated to the task
-            Project taskProject = null;
-            if (dialogSpinner.getSelectedItem() instanceof Project) {
-                taskProject = (Project) dialogSpinner.getSelectedItem();
-            }
-
-            // If a name has not been set
-            if (taskName.trim().isEmpty()) {
-                dialogEditText.setError(getString(R.string.empty_task_name));
-            }
-            // If both project and name of the task have been set
-            else if (taskProject != null) {
-                // TODO 6: No need for that as it's an auto generated primary key
-                //long id = (long) (Math.random() * 50000);
-
-                Task task = new Task(
-                        taskProject.getId(),
-                        taskName,
-                        new Date().getTime()
-                );
-
-                addTask(task);
-
-                dialogInterface.dismiss();
-            }
-            // If name has been set, but project has not been set (this should never occur)
-            else{
-                dialogInterface.dismiss();
-            }
-        }
-        // If dialog is already closed
-        else {
-            dialogInterface.dismiss();
-        }
-    }
-
-    /**
-     * Shows the Dialog for adding a Task
-     */
-    private void showAddTaskDialog() {
-        final AlertDialog dialog = getAddTaskDialog();
-
-        dialog.show();
-
-        dialogEditText = dialog.findViewById(R.id.txt_task_name);
-        dialogSpinner = dialog.findViewById(R.id.project_spinner);
-
-        populateDialogSpinner();
-    }
 
     /**
      * Adds the given task to the list of created tasks.
@@ -258,13 +199,13 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      */
     private void addTask(@NonNull Task task) {
         taskViewModel.insert(task);
-        //tasks.add(task);
-        updateTasks();
+        //updateTasks();
     }
 
     /**
      * Updates the list of tasks in the UI
      */
+    /*
     private void updateTasks() {
         if (mTasks.size() == 0) {
             lblNoTasks.setVisibility(View.VISIBLE);
@@ -272,9 +213,11 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         } else {
             lblNoTasks.setVisibility(View.GONE);
             listTasks.setVisibility(View.VISIBLE);
+            //taskViewModel.sortTasksOrder(sortMethod);
+            //TODO 11 : this should disapear
             switch (sortMethod) {
                 case "ALPHABETICAL":
-                    Collections.sort(mTasks, new Task.TaskAZComparator());
+                    mTasks = taskViewModel.sortTasksOrder(SortingType.ALPHABETICAL);
                     break;
                 case "ALPHABETICAL_INVERTED":
                     Collections.sort(mTasks, new Task.TaskZAComparator());
@@ -291,6 +234,24 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
             }
             adapter.updateTasks(mTasks, allProjects);
         }
+    }
+    */
+
+    //------------//
+    //ALERT DIALOG//
+    //------------//
+    /**
+     * Shows the Dialog for adding a Task
+     */
+    private void showAddTaskDialog() {
+        final AlertDialog dialog = getAddTaskDialog();
+
+        dialog.show();
+
+        dialogEditText = dialog.findViewById(R.id.txt_task_name);
+        dialogSpinner = dialog.findViewById(R.id.project_spinner);
+
+        populateDialogSpinner();
     }
 
     /**
@@ -349,5 +310,59 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                 dialogSpinner.setAdapter(adapter);
             }
         }
+    }
+
+    /**
+     * Called when the user clicks on the positive button of the Create Task Dialog.
+     *
+     * @param dialogInterface the current displayed dialog
+     */
+    private void onPositiveButtonClick(DialogInterface dialogInterface) {
+        // If dialog is open
+        if (dialogEditText != null && dialogSpinner != null) {
+            // Get the name of the task
+            String taskName = dialogEditText.getText().toString();
+
+            // Get the selected project to be associated to the task
+            Project taskProject = null;
+            if (dialogSpinner.getSelectedItem() instanceof Project) {
+                taskProject = (Project) dialogSpinner.getSelectedItem();
+            }
+
+            // If a name has not been set
+            if (taskName.trim().isEmpty()) {
+                dialogEditText.setError(getString(R.string.empty_task_name));
+            }
+            // If both project and name of the task have been set
+            else if (taskProject != null) {
+                // TODO 6: No need for that as it's an auto generated primary key
+                //long id = (long) (Math.random() * 50000);
+
+                Task task = new Task(
+                        taskProject.getId(),
+                        taskName,
+                        new Date().getTime()
+                );
+
+                addTask(task);
+
+                dialogInterface.dismiss();
+            }
+            // If name has been set, but project has not been set (this should never occur)
+            else{
+                dialogInterface.dismiss();
+            }
+        }
+        // If dialog is already closed
+        else {
+            dialogInterface.dismiss();
+        }
+    }
+
+    public enum SortingType {
+        ALPHABETICAL,
+        ALPHABETICAL_INVERTED,
+        RECENT_FIRST,
+        NONE
     }
 }
