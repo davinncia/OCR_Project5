@@ -2,15 +2,6 @@ package com.cleanup.todoc.ui;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,8 +11,16 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.cleanup.todoc.R;
-import com.cleanup.todoc.data.preferences.SortingPreferences;
 import com.cleanup.todoc.di.Injection;
 import com.cleanup.todoc.di.ViewModelFactory;
 import com.cleanup.todoc.model.Project;
@@ -29,7 +28,6 @@ import com.cleanup.todoc.model.Task;
 import com.cleanup.todoc.viewmodel.MainViewModel;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -47,21 +45,9 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     private List<Project> allProjects = new ArrayList<>();
 
     /**
-     * List of all current tasks of the application
-     */
-    @NonNull
-    private List<Task> mTasks = new ArrayList<>();
-
-    /**
      * The adapter which handles the list of tasks
      */
     private final TasksAdapter adapter = new TasksAdapter(this);
-
-    /**
-     * The sort method to be used to display tasks
-     */
-    @NonNull
-    private String sortMethod = "none";
 
     /**
      * Dialog to create a new task
@@ -99,8 +85,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
     private MainViewModel taskViewModel;
 
-    private SortingPreferences sortingPreferences;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,9 +93,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
         listTasks = findViewById(R.id.list_tasks);
         lblNoTasks = findViewById(R.id.lbl_no_task);
-
-        sortingPreferences = Injection.getSortingPreferences();
-        sortMethod = sortingPreferences.getSortingMethod(this);
 
         //TODO 1: set an observer of our viewmodel that refresh the adapter's data
         ViewModelFactory viewModelFactory = Injection.provideViewModelFactory(this);
@@ -124,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
             }
         });
 
-        taskViewModel.getAllTasks().observe(this, new Observer<List<Task>>() {
+        taskViewModel.mediatorTasks.observe(this, new Observer<List<Task>>() {
             @Override
             public void onChanged(List<Task> tasks) {
                 //TODO 4: inform the adapter that data changed
@@ -165,18 +146,18 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         int id = item.getItemId();
 
         if (id == R.id.filter_alphabetical) {
-            sortMethod = getString(R.string.ALPHABETICAL);
-            //TODO 11: Do something in ViewModel
+            //sortMethod = getString(R.string.ALPHABETICAL);
+            taskViewModel.setSortingType(SortingType.ALPHABETICAL);
         } else if (id == R.id.filter_alphabetical_inverted) {
-            sortMethod = getString(R.string.ALPHABETICAL_INVERTED);
+            //sortMethod = getString(R.string.ALPHABETICAL_INVERTED);
+            taskViewModel.setSortingType(SortingType.ALPHABETICAL_INVERTED);
         } else if (id == R.id.filter_oldest_first) {
-            sortMethod = getString(R.string.OLD_FIRST);
+            //sortMethod = getString(R.string.OLD_FIRST);
+            taskViewModel.setSortingType(SortingType.OLDEST_FIRST);
         } else if (id == R.id.filter_recent_first) {
-            sortMethod = getString(R.string.RECENT_FIRST);
+            //sortMethod = getString(R.string.RECENT_FIRST);
+            taskViewModel.setSortingType(SortingType.RECENT_FIRST);
         }
-
-        //TODO 5: Put this in preferences
-        sortingPreferences.saveSortingMethod(this, sortMethod);
 
         //updateTasks();
 
@@ -362,6 +343,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     public enum SortingType {
         ALPHABETICAL,
         ALPHABETICAL_INVERTED,
+        OLDEST_FIRST,
         RECENT_FIRST,
         NONE
     }

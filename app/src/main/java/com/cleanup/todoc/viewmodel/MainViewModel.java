@@ -1,12 +1,9 @@
 package com.cleanup.todoc.viewmodel;
 
-import android.app.Application;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 
 import com.cleanup.todoc.model.Project;
@@ -14,7 +11,6 @@ import com.cleanup.todoc.model.Task;
 import com.cleanup.todoc.repository.TaskRepository;
 import com.cleanup.todoc.ui.MainActivity;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -28,15 +24,24 @@ public class MainViewModel extends ViewModel {
     //DATA
     @NonNull
     private LiveData<List<Task>> allTasks;
-    private MutableLiveData<List<Task>> mutableLiveDataTasks = new MutableLiveData<>();
+    public MediatorLiveData<List<Task>> mediatorTasks = new MediatorLiveData<>();
     @NonNull
     public LiveData<List<Project>> allProjects;
+
+    private MainActivity.SortingType sortingType = MainActivity.SortingType.NONE;
+
 
     public MainViewModel(TaskRepository taskRepository, Executor executor) {
         this.taskRepository = taskRepository;
         this.executor = executor;
 
         allTasks = taskRepository.getAllTasks();
+        mediatorTasks.addSource(allTasks, new Observer<List<Task>>() {
+            @Override
+            public void onChanged(List<Task> tasks) {
+                mediatorTasks.setValue(sortTasksOrder(sortingType));
+            }
+        });
 
         allProjects = taskRepository.getAllProjects();
     }
@@ -44,10 +49,6 @@ public class MainViewModel extends ViewModel {
     // -------------
     //FOR TASKS
     // -------------
-    @NonNull
-    public LiveData<List<Task>> getAllTasks(){
-        return allTasks;
-    }
 
     public void insert(final Task task){
         executor.execute(new Runnable() {
@@ -65,6 +66,11 @@ public class MainViewModel extends ViewModel {
                 taskRepository.delete(task);
             }
         });
+    }
+
+    public void setSortingType(final MainActivity.SortingType sortingType){
+        this.sortingType = sortingType;
+        mediatorTasks.setValue(sortTasksOrder(sortingType));
     }
 
     // -------------
@@ -96,8 +102,13 @@ public class MainViewModel extends ViewModel {
                 Collections.sort(sortedTasks, new Task.TaskAZComparator());
                 break;
             case ALPHABETICAL_INVERTED:
+                Collections.sort(sortedTasks, new Task.TaskZAComparator());
+                break;
+            case OLDEST_FIRST:
+                Collections.sort(sortedTasks, new Task.TaskOldComparator());
                 break;
             case RECENT_FIRST:
+                Collections.sort(sortedTasks, new Task.TaskRecentComparator());
                 break;
             case NONE:
                 break;
