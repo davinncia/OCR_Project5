@@ -108,7 +108,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
         private final TextView lblProjectName;
 
         /**
-         * The delete icon
+         * The deleteTask icon
          */
         private final AppCompatImageView imgDelete;
 
@@ -154,6 +154,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
             imgDelete.setTag(task);
 
             //TODO 12: get project by id
+
             final Project taskProject = getCorrespondingProject(task, mProjects);
 
             if (taskProject != null) {

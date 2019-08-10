@@ -21,16 +21,20 @@ public class MainViewModel extends ViewModel {
     private final TaskRepository taskRepository;
     private final Executor executor;
 
+    //SORTING
+    private MainActivity.SortingType sortingType = MainActivity.SortingType.NONE;
+
     //DATA
     @NonNull
     private LiveData<List<Task>> allTasks;
     public MediatorLiveData<List<Task>> mediatorTasks = new MediatorLiveData<>();
+
     @NonNull
-    public LiveData<List<Project>> allProjects;
+    private LiveData<List<Project>> allProjects;
 
-    private MainActivity.SortingType sortingType = MainActivity.SortingType.NONE;
-
-
+    // -------------
+    // CONSTRUCTOR
+    // -------------
     public MainViewModel(TaskRepository taskRepository, Executor executor) {
         this.taskRepository = taskRepository;
         this.executor = executor;
@@ -50,16 +54,7 @@ public class MainViewModel extends ViewModel {
     //FOR TASKS
     // -------------
 
-    public void insert(final Task task){
-        executor.execute(new Runnable() {
-           @Override
-            public void run() {
-               taskRepository.insert(task);
-           }
-        });
-    }
-
-    public void delete(final Task task){
+    public void deleteTask(final Task task){
         executor.execute(new Runnable() {
             @Override
             public void run() {
