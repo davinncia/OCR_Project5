@@ -1,5 +1,7 @@
 package com.cleanup.todoc.viewmodel;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -35,5 +37,7 @@ public class AddTaskViewModel extends ViewModel {
                 mTaskRepository.insert(task);
             }
         });
+        Log.d("debuglog", "TaskAdded");
+
     }
 }

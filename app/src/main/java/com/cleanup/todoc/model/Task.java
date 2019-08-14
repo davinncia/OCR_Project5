@@ -23,7 +23,8 @@ import java.util.Comparator;
         indices = @Index("project_id"),
         foreignKeys = @ForeignKey(entity = Project.class, parentColumns = "id", childColumns = "project_id", onDelete = ForeignKey.CASCADE))
 
-public class Task {
+//TODO Nino : Implement comparable correct ?
+public class Task implements Comparable {
     /**
      * The unique identifier of the task
      */
@@ -135,6 +136,11 @@ public class Task {
      */
     private void setCreationTimestamp(long creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return 0;
     }
 
     /**

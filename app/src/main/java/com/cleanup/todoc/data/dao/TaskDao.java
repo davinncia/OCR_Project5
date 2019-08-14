@@ -16,10 +16,15 @@ public interface TaskDao {
     @Query("SELECT * FROM task_table ")
     LiveData<List<Task>> getAllTasks();
 
+    @Query("DELETE FROM task_table WHERE id = :taskId")
+    void deleteTaskById(int taskId);
+
     @Insert
     void insert(Task task);
 
     @Delete
     void delete(Task task);
+
+
 
 }

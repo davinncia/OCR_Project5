@@ -72,7 +72,7 @@ public class DbInstrumentedTest {
         List<Task> tasks = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());
         assertEquals("test", tasks.get(0).getName());
 
-        //TODO: doesn't seem to deleteTask...
+        //TODO: doesn't seem to deleteTaskById...
         mTaskDao.delete(task);
         List<Task> tasks2 = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());
         assertEquals(0, tasks2.size());

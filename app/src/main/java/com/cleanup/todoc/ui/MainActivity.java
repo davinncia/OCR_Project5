@@ -23,6 +23,7 @@ import com.cleanup.todoc.di.Injection;
 import com.cleanup.todoc.di.ViewModelFactory;
 import com.cleanup.todoc.model.Project;
 import com.cleanup.todoc.model.Task;
+import com.cleanup.todoc.ui.model.UiTaskModel;
 import com.cleanup.todoc.viewmodel.MainViewModel;
 
 import java.util.ArrayList;
@@ -91,18 +92,30 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         listTasks = findViewById(R.id.list_tasks);
         lblNoTasks = findViewById(R.id.lbl_no_task);
 
-        //TODO 1: set an observer of our viewmodel that refresh the adapter's data
-        ViewModelFactory viewModelFactory = Injection.provideViewModelFactory(this);
-        taskViewModel = ViewModelProviders.of(this, viewModelFactory).get(MainViewModel.class);
 
-        taskViewModel.getAllProjects().observe(this, new Observer<List<Project>>() {
+
+        listTasks.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+        listTasks.setAdapter(adapter);
+
+        findViewById(R.id.fab_add_task).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onChanged(List<Project> projects) {
-                    allProjects = projects;
+            public void onClick(View view) {
+                showAddTaskDialog();
             }
         });
 
-        taskViewModel.mediatorTasks.observe(this, new Observer<List<Task>>() {
+        //TODO 1: set an observer of our viewmodel that refresh the adapter's data
+        ViewModelFactory viewModelFactory = Injection.provideViewModelFactory(this);
+        taskViewModel = ViewModelProviders.of(this, viewModelFactory).get(MainViewModel.class);
+/*
+        taskViewModel.getAllProjects().observe(this, new Observer<List<Project>>() {
+            @Override
+            public void onChanged(List<Project> projects) {
+                allProjects = projects;
+            }
+        });
+
+        taskViewModel.tasksLiveData.observe(this, new Observer<List<Task>>() {
             @Override
             public void onChanged(List<Task> tasks) {
                 //TODO 4: inform the adapter that data changed and actualize UI
@@ -117,14 +130,19 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
             }
         });
+*/
 
-        listTasks.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-        listTasks.setAdapter(adapter);
-
-        findViewById(R.id.fab_add_task).setOnClickListener(new View.OnClickListener() {
+        taskViewModel.sortedTasks.observe(this, new Observer<List<UiTaskModel>>() {
             @Override
-            public void onClick(View view) {
-                showAddTaskDialog();
+            public void onChanged(List<UiTaskModel> uiTaskModels) {
+                if (uiTaskModels == null || uiTaskModels.size() == 0){
+                    lblNoTasks.setVisibility(View.VISIBLE);
+                    listTasks.setVisibility(View.GONE);
+                } else {
+                    lblNoTasks.setVisibility(View.GONE);
+                    listTasks.setVisibility(View.VISIBLE);
+                    adapter.updateTasks(uiTaskModels);
+                }
             }
         });
     }
@@ -158,10 +176,11 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         return super.onOptionsItemSelected(item);
     }
 
+    //TODO Nino: I had to delete by id now as Task object is not accessible anymore
     @Override
-    public void onDeleteTask(Task task) {
-        //TODO 3: deleteTask in database
-        taskViewModel.deleteTask(task);
+    public void onDeleteTask(int taskId) {
+        //TODO 3: deleteTaskById in database
+        taskViewModel.deleteTaskById(taskId);
         //tasks.remove(task);
         //updateTasks();
     }

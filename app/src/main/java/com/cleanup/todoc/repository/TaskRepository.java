@@ -33,8 +33,8 @@ public class TaskRepository {
         taskDao.insert(task);
     }
 
-    public void delete(Task task){
-        taskDao.delete(task);
+    public void deleteTaskById(int id){
+        taskDao.deleteTaskById(id);
     }
 
     public LiveData<List<Task>> getAllTasks(){

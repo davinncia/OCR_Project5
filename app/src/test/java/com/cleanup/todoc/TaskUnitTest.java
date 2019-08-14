@@ -21,7 +21,7 @@ public class TaskUnitTest {
 
     @Test
     public void test_projects() {
-        //TODO: not testable here as we got to access db
+        //TODO: not testable here as we got to access db now
         final Task task1 = new Task(1, "task1", new Date().getTime());
         final Task task2 = new Task(2, "task2", new Date().getTime());
         final Task task3 = new Task(3, "task3", new Date().getTime());

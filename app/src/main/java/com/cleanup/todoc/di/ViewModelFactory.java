@@ -15,6 +15,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
     private final TaskRepository mTaskRepository;
     private final Executor mExecutor;
 
+    //TODO: singleton
     public ViewModelFactory(TaskRepository taskRepository, Executor executor) {
         mTaskRepository = taskRepository;
         mExecutor = executor;
