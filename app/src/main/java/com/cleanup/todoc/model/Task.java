@@ -23,8 +23,7 @@ import java.util.Comparator;
         indices = @Index("project_id"),
         foreignKeys = @ForeignKey(entity = Project.class, parentColumns = "id", childColumns = "project_id", onDelete = ForeignKey.CASCADE))
 
-//TODO Nino : Implement comparable correct ?
-public class Task implements Comparable {
+public class Task {
     /**
      * The unique identifier of the task
      */
@@ -61,8 +60,6 @@ public class Task implements Comparable {
         this.setCreationTimestamp(creationTimestamp);
     }
 
-
-
     /**
      * Returns the unique identifier of the task.
      *
@@ -94,17 +91,6 @@ public class Task implements Comparable {
         this.projectId = projectId;
     }
 
-    /**
-     * Returns the project associated to the task.
-     *
-     * @return the project associated to the task
-     */
-    /*
-    @Nullable
-    public Project getProject() {
-        return Project.getProjectById(projectId);
-    }
-    */
 
     /**
      * Returns the name of the task.
@@ -136,50 +122,5 @@ public class Task implements Comparable {
      */
     private void setCreationTimestamp(long creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        return 0;
-    }
-
-    /**
-     * Comparator to sort task from A to Z
-     */
-    public static class TaskAZComparator implements Comparator<Task> {
-        @Override
-        public int compare(Task left, Task right) {
-            return left.name.compareTo(right.name);
-        }
-    }
-
-    /**
-     * Comparator to sort task from Z to A
-     */
-    public static class TaskZAComparator implements Comparator<Task> {
-        @Override
-        public int compare(Task left, Task right) {
-            return right.name.compareTo(left.name);
-        }
-    }
-
-    /**
-     * Comparator to sort task from last created to first created
-     */
-    public static class TaskRecentComparator implements Comparator<Task> {
-        @Override
-        public int compare(Task left, Task right) {
-            return (int) (right.creationTimestamp - left.creationTimestamp);
-        }
-    }
-
-    /**
-     * Comparator to sort task from first created to last created
-     */
-    public static class TaskOldComparator implements Comparator<Task> {
-        @Override
-        public int compare(Task left, Task right) {
-            return (int) (left.creationTimestamp - right.creationTimestamp);
-        }
     }
 }

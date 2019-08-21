@@ -1,9 +1,5 @@
 package com.cleanup.todoc.viewmodel;
 
-import android.graphics.Color;
-import android.util.Log;
-
-import androidx.annotation.ColorInt;
 import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
@@ -20,10 +16,10 @@ import com.cleanup.todoc.ui.model.UiTaskModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.concurrent.Executor;
+
+import static com.cleanup.todoc.ui.MainActivity.SortingType.NONE;
 
 public class MainViewModel extends ViewModel {
 
@@ -32,19 +28,11 @@ public class MainViewModel extends ViewModel {
     private final Executor executor;
 
     //SORTING
-    private MainActivity.SortingType sortingType = MainActivity.SortingType.ALPHABETICAL;
+    private MutableLiveData<MainActivity.SortingType> mSortingTypeLiveData = new MutableLiveData<>();
 
-
-    //LiveData to expose
     private LiveData<List<UiTaskModel>> tasksLiveData;
 
     public MediatorLiveData<List<UiTaskModel>> sortedTasks = new MediatorLiveData<>();
-
-
-/*
-    @NonNull
-    private LiveData<List<Project>> allProjects;
-*/
 
     // -------------
     // CONSTRUCTOR
@@ -53,7 +41,7 @@ public class MainViewModel extends ViewModel {
         this.taskRepository = taskRepository;
         this.executor = executor;
 
-        //TODO Nino : not triggered when sortingType changes...
+        mSortingTypeLiveData.setValue(NONE);
 
         //Tasks as source
         tasksLiveData = Transformations.switchMap(taskRepository.getAllTasks(), new Function<List<Task>, LiveData<List<UiTaskModel>>>() {
@@ -66,9 +54,6 @@ public class MainViewModel extends ViewModel {
                     public List<UiTaskModel> apply(List<Project> projectList) {
 
                         List<UiTaskModel> result = new ArrayList<>();
-
-                        //TreeSet<Task> sortedTasks = new TreeSet<>(sortTasksOrder(sortingType));
-                        //sortedTasks.addAll(taskList);
 
                         for (Task task : taskList){
 
@@ -86,14 +71,53 @@ public class MainViewModel extends ViewModel {
             }
         });
 
-        //Adding a source to our mediator
+        //Adding data as source to our mediator
         sortedTasks.addSource(tasksLiveData, new Observer<List<UiTaskModel>>() {
             @Override
             public void onChanged(List<UiTaskModel> uiTaskModels) {
-                sortedTasks.setValue(sortTasksOrder(tasksLiveData.getValue(), sortingType));
+                sortedTasks.setValue(combineDataAndSortingType(tasksLiveData, mSortingTypeLiveData));
+
             }
         });
 
+        //Adding order as source to our mediator
+        sortedTasks.addSource(mSortingTypeLiveData, new Observer<MainActivity.SortingType>() {
+            @Override
+            public void onChanged(MainActivity.SortingType sortingType) {
+                sortedTasks.setValue(combineDataAndSortingType(tasksLiveData, mSortingTypeLiveData));
+            }
+        });
+    }
+
+    // -------------
+    // ORDERING
+    // -------------
+    private List<UiTaskModel> combineDataAndSortingType(LiveData<List<UiTaskModel>> tasksLiveData, MutableLiveData<MainActivity.SortingType> sortingTypeLiveData) {
+
+        if (tasksLiveData.getValue() == null || sortingTypeLiveData.getValue() == null){
+            return new ArrayList<>();
+        }
+
+        List<UiTaskModel> listToSort = tasksLiveData.getValue();
+
+        switch (sortingTypeLiveData.getValue()){
+            case NONE:
+                return tasksLiveData.getValue();
+            case ALPHABETICAL:
+                Collections.sort(listToSort, new UiTaskModel.UiTaskAZComparator());
+                return listToSort;
+            case ALPHABETICAL_INVERTED:
+                Collections.sort(listToSort, new UiTaskModel.UiTaskZAComparator());
+                return listToSort;
+            case OLDEST_FIRST:
+                Collections.sort(listToSort, new UiTaskModel.UiTaskOldComparator());
+                return listToSort;
+            case RECENT_FIRST:
+                Collections.sort(listToSort, new UiTaskModel.UiTaskRecentComparator());
+                return listToSort;
+            default:
+                return listToSort;
+        }
     }
 
     // -------------
@@ -110,22 +134,15 @@ public class MainViewModel extends ViewModel {
         });
     }
 
-    public void setSortingType(final MainActivity.SortingType sortingType){
-        this.sortingType = sortingType;
 
-        //TODO : we need somehow to trigger our LiveData !
-        sortedTasks.setValue(sortTasksOrder(sortedTasks.getValue(), sortingType));
+    public void setSortingType(final MainActivity.SortingType sortingType){
+        this.mSortingTypeLiveData.setValue(sortingType);
     }
+
 
     // -------------
     // FOR PROJECTS
     // -------------
-    /*
-    @NonNull
-    public LiveData<List<Project>> getAllProjects() {
-        return allProjects;
-    }
-    */
 
     public void deleteProject(final Project project){
         executor.execute(new Runnable() {
@@ -135,52 +152,5 @@ public class MainViewModel extends ViewModel {
             }
         });
     }
-
-    // -------------
-    // SORTING ORDER
-    // -------------
-
-    /*
-    private Comparator<Task> sortTasksOrder(MainActivity.SortingType sortingType){
-
-        switch (sortingType){
-            case ALPHABETICAL:
-                return new Task.TaskAZComparator();
-            case ALPHABETICAL_INVERTED:
-               return new Task.TaskZAComparator();
-            case OLDEST_FIRST:
-                return new Task.TaskOldComparator();
-            case RECENT_FIRST:
-                return new Task.TaskRecentComparator();
-            case NONE:
-                break;
-        }
-        return null;
-    }
-    */
-
-
-    private List<UiTaskModel> sortTasksOrder(List<UiTaskModel> uiTasks, MainActivity.SortingType sortingType){
-
-
-        switch (sortingType){
-            case ALPHABETICAL:
-                Collections.sort(uiTasks, new UiTaskModel.UiTaskAZComparator());
-                break;
-            case ALPHABETICAL_INVERTED:
-                Collections.sort(uiTasks, new UiTaskModel.UiTaskZAComparator());
-                break;
-            case OLDEST_FIRST:
-                Collections.sort(uiTasks, new UiTaskModel.UiTaskOldComparator());
-                break;
-            case RECENT_FIRST:
-                Collections.sort(uiTasks, new UiTaskModel.UiTaskRecentComparator());
-                break;
-            case NONE:
-                break;
-        }
-        return uiTasks;
-    }
-
 
 }
