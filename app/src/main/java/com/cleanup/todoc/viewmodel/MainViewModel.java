@@ -31,7 +31,6 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<MainActivity.SortingType> mSortingTypeLiveData = new MutableLiveData<>();
 
     private LiveData<List<UiTaskModel>> tasksLiveData;
-
     public MediatorLiveData<List<UiTaskModel>> sortedTasks = new MediatorLiveData<>();
 
     // -------------

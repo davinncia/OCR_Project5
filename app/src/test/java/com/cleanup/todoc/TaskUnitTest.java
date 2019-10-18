@@ -23,20 +23,6 @@ import static org.junit.Assert.assertSame;
 public class TaskUnitTest {
 
     @Test
-    public void test_projects() {
-        //TODO: not testable here as we got to access db now
-        final Task task1 = new Task(1, "task1", new Date().getTime());
-        final Task task2 = new Task(2, "task2", new Date().getTime());
-        final Task task3 = new Task(3, "task3", new Date().getTime());
-        final Task task4 = new Task(4, "task4", new Date().getTime());
-
-       // assertEquals("Projet Tartampion", task1.getProject().getName());
-       // assertEquals("Projet Lucidia", task2.getProject().getName());
-       // assertEquals("Projet Circus", task3.getProject().getName());
-       // assertNull(task4.getProject());
-    }
-
-    @Test
     public void test_az_comparator() {
         final UiTaskModel uiTask1 = new UiTaskModel(1, 1, "aaa", "Tart", 123);
         final UiTaskModel uiTask2 = new UiTaskModel(1, 2, "bbb", "Circ", 124);

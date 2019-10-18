@@ -3,6 +3,7 @@ package com.cleanup.todoc;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.room.Room;
@@ -25,7 +26,9 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class DbInstrumentedTest {
@@ -65,18 +68,35 @@ public class DbInstrumentedTest {
     }
 
     @Test
-    public void insertReadAndDeleteTask() throws InterruptedException {
+    public void insertTaskInDb() throws InterruptedException {
+
+        Task task = new Task(1, "test", 1234);
+        mTaskDao.insert(task);
+        List<Task> tasks = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());
+        assertEquals(1, tasks.size());
+    }
+
+    @Test
+    public void retrieveTaskInDb() throws InterruptedException {
 
         Task task = new Task(1, "test", 1234);
         mTaskDao.insert(task);
         List<Task> tasks = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());
         assertEquals("test", tasks.get(0).getName());
+    }
 
-        //TODO: doesn't seem to deleteTaskById...
+    @Test
+    public void deleteTaskInDb() throws InterruptedException {
+
+        Task task = new Task(1, "test", 1234);
+        task.setId(1); //TODO: Without this doesn't delete. Why ?
+        mTaskDao.insert(task);
+        List<Task> tasks = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());
+        assertEquals("test", tasks.get(0).getName());
+
         mTaskDao.delete(task);
         List<Task> tasks2 = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());
         assertEquals(0, tasks2.size());
-        //assertNull(tasks2.get(0));
     }
 
     //Foreign Key CASCADE test
