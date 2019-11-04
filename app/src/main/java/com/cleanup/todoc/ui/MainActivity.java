@@ -4,13 +4,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
@@ -21,12 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cleanup.todoc.R;
 import com.cleanup.todoc.di.Injection;
 import com.cleanup.todoc.di.ViewModelFactory;
-import com.cleanup.todoc.model.Project;
-import com.cleanup.todoc.model.Task;
 import com.cleanup.todoc.ui.model.UiTaskModel;
 import com.cleanup.todoc.viewmodel.MainViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,34 +30,11 @@ import java.util.List;
  * @author Gaëtan HERFRAY
  */
 public class MainActivity extends AppCompatActivity implements TasksAdapter.DeleteTaskListener {
-    /**
-     * List of all projects available in the application
-     */
-    //TODO 0: get projects from project_table
-    private List<Project> allProjects = new ArrayList<>();
 
     /**
      * The adapter which handles the list of tasks
      */
     private final TasksAdapter adapter = new TasksAdapter(this);
-
-    /**
-     * Dialog to create a new task
-     */
-    @Nullable
-    public AlertDialog dialog = null;
-
-    /**
-     * EditText that allows user to set the name of a task
-     */
-    @Nullable
-    private EditText dialogEditText = null;
-
-    /**
-     * Spinner that allows the user to associate a project to a task
-     */
-    @Nullable
-    private Spinner dialogSpinner = null;
 
     /**
      * The RecyclerView which displays the list of tasks
@@ -86,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
         listTasks = findViewById(R.id.list_tasks);
@@ -106,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         ViewModelFactory viewModelFactory = Injection.provideViewModelFactory(this);
         taskViewModel = ViewModelProviders.of(this, viewModelFactory).get(MainViewModel.class);
 
-        taskViewModel.sortedTasks.observe(this, new Observer<List<UiTaskModel>>() {
+        taskViewModel.sortedUiTasks.observe(this, new Observer<List<UiTaskModel>>() {
             @Override
             public void onChanged(List<UiTaskModel> uiTaskModels) {
                 if (uiTaskModels == null || uiTaskModels.size() == 0){

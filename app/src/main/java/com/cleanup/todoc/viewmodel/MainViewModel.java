@@ -30,8 +30,8 @@ public class MainViewModel extends ViewModel {
     //SORTING
     private MutableLiveData<MainActivity.SortingType> mSortingTypeLiveData = new MutableLiveData<>();
 
-    private LiveData<List<UiTaskModel>> tasksLiveData;
-    public MediatorLiveData<List<UiTaskModel>> sortedTasks = new MediatorLiveData<>();
+    private LiveData<List<UiTaskModel>> uiTasksLiveData;
+    public MediatorLiveData<List<UiTaskModel>> sortedUiTasks = new MediatorLiveData<>();
 
     // -------------
     // CONSTRUCTOR
@@ -43,7 +43,7 @@ public class MainViewModel extends ViewModel {
         mSortingTypeLiveData.setValue(NONE);
 
         //Tasks as source
-        tasksLiveData = Transformations.switchMap(taskRepository.getAllTasks(), new Function<List<Task>, LiveData<List<UiTaskModel>>>() {
+        uiTasksLiveData = Transformations.switchMap(taskRepository.getAllTasks(), new Function<List<Task>, LiveData<List<UiTaskModel>>>() {
             @Override
             public LiveData<List<UiTaskModel>> apply(final List<Task> taskList) {
 
@@ -71,19 +71,19 @@ public class MainViewModel extends ViewModel {
         });
 
         //Adding data as source to our mediator
-        sortedTasks.addSource(tasksLiveData, new Observer<List<UiTaskModel>>() {
+        sortedUiTasks.addSource(uiTasksLiveData, new Observer<List<UiTaskModel>>() {
             @Override
             public void onChanged(List<UiTaskModel> uiTaskModels) {
-                sortedTasks.setValue(combineDataAndSortingType(tasksLiveData, mSortingTypeLiveData));
+                sortedUiTasks.setValue(combineDataAndSortingType(uiTasksLiveData, mSortingTypeLiveData));
 
             }
         });
 
         //Adding order as source to our mediator
-        sortedTasks.addSource(mSortingTypeLiveData, new Observer<MainActivity.SortingType>() {
+        sortedUiTasks.addSource(mSortingTypeLiveData, new Observer<MainActivity.SortingType>() {
             @Override
             public void onChanged(MainActivity.SortingType sortingType) {
-                sortedTasks.setValue(combineDataAndSortingType(tasksLiveData, mSortingTypeLiveData));
+                sortedUiTasks.setValue(combineDataAndSortingType(uiTasksLiveData, mSortingTypeLiveData));
             }
         });
     }

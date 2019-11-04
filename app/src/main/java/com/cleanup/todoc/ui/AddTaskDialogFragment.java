@@ -134,7 +134,6 @@ public class AddTaskDialogFragment extends DialogFragment {
 
             if (dialogSpinner.getSelectedItem() instanceof Project) {
                 taskProject = (Project) dialogSpinner.getSelectedItem();
-
             }
 
             // If a name has not been set

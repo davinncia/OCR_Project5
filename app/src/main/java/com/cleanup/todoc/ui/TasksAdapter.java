@@ -25,8 +25,6 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
     /**
      * The list of tasks the adapter deals with
      */
-    //private List<Task> mTasks;
-
     //private List<Project> mProjects;
     private List<UiTaskModel> mUiTaskModels;
 
@@ -38,8 +36,6 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
 
     /**
      * Instantiates a new TasksAdapter.
-     *
-     *
      */
     TasksAdapter(@NonNull final DeleteTaskListener deleteTaskListener) {
         this.deleteTaskListener = deleteTaskListener;
@@ -151,9 +147,6 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
                 @Override
                 public void onClick(View view) {
                     final int tag = (int) view.getTag();
-                    //if (tag instanceof Task) {
-                    //    TaskViewHolder.this.deleteTaskListener.onDeleteTask((Task) tag);
-                    //}
 
                     TaskViewHolder.this.deleteTaskListener.onDeleteTask(tag);
 
@@ -161,39 +154,5 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
                     }
             });
         }
-
-        /**
-         * Binds a task to the item view.
-         *
-         * @param task the task to bind in the item view
-         */
-        /*
-        void bind(Task task) {
-            lblTaskName.setText(task.getName());
-            imgDelete.setTag(task);
-
-            //TODO 12: get project by id
-
-            final Project taskProject = getCorrespondingProject(task, mProjects);
-
-            if (taskProject != null) {
-                imgProject.setSupportImageTintList(ColorStateList.valueOf(taskProject.getColor()));
-                lblProjectName.setText(taskProject.getName());
-            } else {
-                imgProject.setVisibility(View.INVISIBLE);
-                lblProjectName.setText("");
-            }
-
-        }
-
-        private Project getCorrespondingProject(Task task, List<Project> projects){
-            for (Project project : projects){
-                if (task.getProjectId() == project.getId()){
-                    return project;
-                }
-            }
-            return null;
-        }
-        */
     }
 }

@@ -1,9 +1,7 @@
 package com.cleanup.todoc;
 
-import android.app.Application;
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.room.Room;
@@ -26,9 +24,6 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class DbInstrumentedTest {
@@ -89,7 +84,7 @@ public class DbInstrumentedTest {
     public void deleteTaskInDb() throws InterruptedException {
 
         Task task = new Task(1, "test", 1234);
-        task.setId(1); //TODO: Without this doesn't delete. Why ?
+        task.setId(1); //Without this doesn't delete.
         mTaskDao.insert(task);
         List<Task> tasks = LiveDataTestUtils.getValue(mTaskDao.getAllTasks());
         assertEquals("test", tasks.get(0).getName());

@@ -15,8 +15,8 @@ import com.cleanup.todoc.model.Task;
 
 @Database(entities = {Task.class, Project.class}, version = 1)
 public abstract class TaskDataBase extends RoomDatabase {
-
-    public static TaskDataBase instance;
+    
+    private static TaskDataBase instance;
 
     public abstract TaskDao taskDao();
     public abstract ProjectDao projectDao();
